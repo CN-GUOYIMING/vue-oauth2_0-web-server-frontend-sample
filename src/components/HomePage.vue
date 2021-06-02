@@ -31,6 +31,7 @@ export default {
     },
 
     clearToken() {
+      localStorage.clear();
       this.token = "";
       location.reload();
     },
@@ -59,8 +60,9 @@ export default {
       // セキュリティ対策
       if (!domains.includes(event.origin)) return;
 
-      localStorage.setItem("token", event.data.token);
-      this.token = event.data.token;
+      const token = event.data.token;
+      localStorage.setItem("token", token);
+      this.token = token;
       this.isOpenLogin = false;
     });
   }
