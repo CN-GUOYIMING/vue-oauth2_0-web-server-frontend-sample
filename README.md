@@ -1,4 +1,4 @@
-# Home Page
+# Home Page (Client Server)
 
 > A Vue.js project
 
