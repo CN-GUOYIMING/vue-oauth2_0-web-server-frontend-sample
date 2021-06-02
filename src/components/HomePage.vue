@@ -39,7 +39,7 @@ export default {
       this.$axios({
         method: "get",
         url: "/static/api/api.json",
-        headers: { Authorization: `Token ${this.token}` }
+        headers: { Authorization: `Token ${localStorage.getItem("token")}` }
       })
         .then(response => console.log("response", response))
         .catch(error => console.log("error", error));
@@ -47,7 +47,7 @@ export default {
   },
   created() {
     const domains = [
-      "http://localhost:8080/" // ログイン画面を持つサーバー
+      "http://localhost:8080" // ログイン画面を持つサーバー
     ];
 
     /**
@@ -59,6 +59,7 @@ export default {
       // セキュリティ対策
       if (!domains.includes(event.origin)) return;
 
+      localStorage.setItem("token", event.data.token);
       this.token = event.data.token;
       this.isOpenLogin = false;
     });
