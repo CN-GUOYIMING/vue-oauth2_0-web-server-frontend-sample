@@ -24,30 +24,21 @@ export default {
   data() {
     return {
       loginMessage: "",
-      clientId: "client01",
-      authorizeState: "authorization01"
+      clientId: "my-client-1",
+      clientPassword: "12345678",
+      myDomain: "http://localhost:8081",
+      targetDomain: "http://localhost:8090"
     };
   },
 
   methods: {
     goToAuthorize() {
-      // window.location = `http://localhost:8090/?client_id=${this.clientId}&redirect_uri=http://localhost:8081/callback&response_type=code&state=${this.authorizeState}`;
-      this.$axios
-        .get("http://localhost:8090/oauth/authorize", {
-          params: {
-            response_type: "code",
-            client_id: "my-client-1",
-            redirect_uri: "http://localhost:8081",
-            scope: "all"
-          }
-        })
-        .then(response => document.write(response.data))
-        .catch(error => console.log(error));
+      window.location = `${this.targetDomain}/oauth/authorize?response_type=code&client_id=${this.clientId}&redirect_uri=${this.myDomain}&scope=all`;
     },
 
     clearToken() {
       localStorage.clear();
-      window.location = "http://localhost:8081";
+      window.location = this.myDomain;
     },
 
     callAPI() {
@@ -81,26 +72,19 @@ export default {
   },
 
   created() {
-    // if (window.location.search.includes("token")) {
-    //   localStorage.setItem("token", this.getUrlParameter("token"));
-    //   localStorage.setItem(
-    //     "refresh_token",
-    //     this.getUrlParameter("refresh_token")
-    //   );
-    // } else
     if (window.location.search.includes("code")) {
       this.$axios
-        .post("http://localhost:8090/oauth/token", {
+        .post(`${this.targetDomain}/oauth/token`, {
           data: {
             grant_type: "authorization_code",
             code: this.getUrlParameter("code"),
-            redirect_uri: "http://localhost:8081",
+            redirect_uri: this.myDomain,
             client_id: "my-client-1"
           },
           headers: {
             "Content-Type": "application/x-www-form-urlencoded",
             Authorization: java.util.Base64.getEncoder().encodeToString(
-              "my-client-1:12345678".getBytes()
+              `${this.clientId}:${this.clientPassword}`.getBytes()
             )
           }
         })
@@ -110,13 +94,6 @@ export default {
           localStorage.setItem("refresh_token", data.refresh_token);
         })
         .catch(error => console.log(error));
-      // if (this.getUrlParameter("state") === this.authorizeState) {
-      //   window.location = `http://localhost:8080/?code=${this.getUrlParameter(
-      //     "code"
-      //   )}&client_id=${
-      //     this.clientId
-      //   }&client_secret=password&redirect_uri=http://localhost:8081/callback`;
-      // }
     }
   }
 };
