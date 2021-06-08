@@ -1,14 +1,19 @@
 <template>
   <div id="HomePage">
-    <h1 v-if="loginMessage === ''">未アクセスです。</h1>
+    <h1 v-if="!loginMessage">未アクセスです。</h1>
     <h1 v-else>アクセスに{{ loginMessage }}しました。</h1>
 
     <div class="button-group">
-      <button class="button-common" @click="goToAuthorize()">
+      <!-- NOTE: 実際の業務では認証を行うタイミングはボタンを押すときではなく、入る時点である。 -->
+      <button class="button-common" @click="doAuthorize()">
         認証サーバーで認証
       </button>
 
-      <button class="button-common call-button" @click="callAPI()">
+      <button
+        class="button-common"
+        @click="callAPI()"
+        :style="{ marginLeft: '1rem' }"
+      >
         アクセス（APIコール）
       </button>
     </div>
@@ -25,34 +30,41 @@ export default {
     return {
       loginMessage: "",
       clientId: "my-client-1",
-      clientPassword: "12345678",
-      myDomain: "http://localhost:8081",
-      targetDomain: "http://localhost:8090"
+      clientSecret: "12345678",
+      webServerDomain: "http://localhost:8081",
+      authorizeServerDomain: "http://localhost:8090",
+      timeoutTimer: null,
+      refreshTokenTimer: null
     };
   },
 
   methods: {
-    goToAuthorize() {
-      window.location = `${this.targetDomain}/oauth/authorize?response_type=code&client_id=${this.clientId}&redirect_uri=${this.myDomain}&scope=all`;
-    },
-
-    clearToken() {
-      localStorage.clear();
-      window.location = this.myDomain;
+    doAuthorize() {
+      window.location = `${this.authorizeServerDomain}/oauth/authorize?response_type=code&client_id=${this.clientId}&redirect_uri=${this.webServerDomain}&scope=all`;
     },
 
     callAPI() {
-      const token = localStorage.getItem("token");
+      this.resetTokenTimeoutTimer();
 
-      token
+      const accessToken = localStorage.getItem("access_token");
+
+      // NOTE: ダミーの請求コード
+      accessToken
         ? this.$axios({
             method: "get",
             url: "/static/api/api.json",
-            headers: { Authorization: `Token ${token}` }
+            headers: {
+              Authorization: `Token ${accessToken}`
+            }
           })
             .then(response => (this.loginMessage = "成功"))
             .catch(error => console.log("error", error))
         : (this.loginMessage = "失敗");
+    },
+
+    clearToken() {
+      localStorage.clear();
+      window.location = this.webServerDomain;
     },
 
     getUrlParameter(parameterName) {
@@ -68,32 +80,98 @@ export default {
       });
 
       return target.split("=")[1];
-    }
-  },
+    },
 
-  created() {
-    if (window.location.search.includes("code")) {
+    sendGetTokenRequest() {
+      /**
+       * "Content-Type": "application/x-www-form-urlencoded" は
+       * "key1=value1&key2=value2" の形のデータが必要。
+       */
+      const params = new URLSearchParams();
+      params.append("grant_type", "authorization_code");
+      params.append("code", this.getUrlParameter("code"));
+      params.append("redirect_uri", this.webServerDomain);
+      params.append("client_id", this.clientId);
+
+      // axios.post(url, data, config)
       this.$axios
-        .post(`${this.targetDomain}/oauth/token`, {
-          data: {
-            grant_type: "authorization_code",
-            code: this.getUrlParameter("code"),
-            redirect_uri: this.myDomain,
-            client_id: "my-client-1"
-          },
+        .post(`${this.authorizeServerDomain}/oauth/token`, params, {
           headers: {
             "Content-Type": "application/x-www-form-urlencoded",
-            Authorization: java.util.Base64.getEncoder().encodeToString(
-              `${this.clientId}:${this.clientPassword}`.getBytes()
-            )
+            // btoa(): Base64 にエンコード、デコードは atob()
+            Authorization: `Basic ${btoa(
+              `${this.clientId}:${this.clientSecret}`
+            )}`
           }
         })
         .then(response => {
-          data = response.data;
+          const data = response.data;
           localStorage.setItem("access_token", data.access_token);
           localStorage.setItem("refresh_token", data.refresh_token);
+          window.location = this.webServerDomain;
         })
         .catch(error => console.log(error));
+    },
+
+    sendRefreshTokenRequest() {
+      const refreshToken = localStorage.getItem("refresh_token");
+
+      if (refreshToken) {
+        /**
+         * "Content-Type": "application/x-www-form-urlencoded" は
+         * "key1=value1&key2=value2" の形のデータが必要。
+         */
+        const params = new URLSearchParams();
+        params.append("grant_type", "refresh_token");
+        params.append("refresh_token", refreshToken);
+        params.append("client_id", this.clientId);
+        params.append("client_secret", this.clientSecret);
+
+        // axios.post(url, data, config)
+        this.$axios
+          .post(`${this.authorizeServerDomain}/oauth/token`, params, {
+            headers: {
+              "Content-Type": "application/x-www-form-urlencoded",
+              // btoa(): Base64 にエンコード、デコードは atob()
+              Authorization: `Basic ${btoa(
+                `${this.clientId}:${this.clientSecret}`
+              )}`
+            }
+          })
+          .then(response => {
+            console.log("アクセストークンを更新する。");
+            localStorage.setItem("access_token", response.data.access_token);
+          })
+          .catch(error => console.log(error));
+      } else {
+        clearInterval(this.refreshTokenTimer);
+        console.log("トークンが無効になりました。");
+      }
+    },
+
+    resetTokenTimeoutTimer() {
+      clearTimeout(this.timeoutTimer);
+
+      this.timeoutTimer = setTimeout(() => {
+        localStorage.removeItem("refresh_token");
+        localStorage.removeItem("access_token");
+      }, 5000);
+    }
+  },
+
+  // html の描画完了後に実行される。
+  mounted() {
+    if (window.location.search.includes("code")) {
+      this.sendGetTokenRequest();
+    }
+
+    if (localStorage.getItem("access_token")) {
+      // 一定時間毎に refresh_token で access_token を更新
+      this.refreshTokenTimer = setInterval(() => {
+        this.sendRefreshTokenRequest();
+      }, 4000);
+
+      this.resetTokenTimeoutTimer();
     }
   }
 };
@@ -106,9 +184,6 @@ export default {
 }
 .button-group {
   margin-top: 1rem;
-}
-.call-button {
-  margin-left: 1rem;
 }
 .clear-button {
   margin-top: 1rem;
