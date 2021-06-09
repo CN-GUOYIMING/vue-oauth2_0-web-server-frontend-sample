@@ -82,70 +82,85 @@ export default {
       return target.split("=")[1];
     },
 
-    sendGetTokenRequest() {
-      /**
-       * "Content-Type": "application/x-www-form-urlencoded" は
-       * "key1=value1&key2=value2" の形のデータが必要。
-       */
-      const params = new URLSearchParams();
-      params.append("grant_type", "authorization_code");
-      params.append("code", this.getUrlParameter("code"));
-      params.append("redirect_uri", this.webServerDomain);
-      params.append("client_id", this.clientId);
-
+    // async / await でコールバック地獄を消滅
+    async sendGetTokenRequest(parameters) {
       // axios.post(url, data, config)
-      this.$axios
-        .post(`${this.authorizeServerDomain}/oauth/token`, params, {
+      const response = await this.$axios.post(
+        `${this.authorizeServerDomain}/oauth/token`,
+        parameters,
+        {
           headers: {
-            "Content-Type": "application/x-www-form-urlencoded",
+            "Content-Type": "application/x-www-form-urlencoded;charset=utf-8",
             // btoa(): Base64 にエンコード、デコードは atob()
             Authorization: `Basic ${btoa(
               `${this.clientId}:${this.clientSecret}`
             )}`
           }
-        })
-        .then(response => {
-          const data = response.data;
-          localStorage.setItem("access_token", data.access_token);
-          localStorage.setItem("refresh_token", data.refresh_token);
-          window.location = this.webServerDomain;
-        })
-        .catch(error => console.log(error));
+        }
+      );
+
+      return [response.data.access_token, response.data.refresh_token];
     },
 
-    sendRefreshTokenRequest() {
-      const refreshToken = localStorage.getItem("refresh_token");
-
-      if (refreshToken) {
+    async getToken() {
+      try {
         /**
+         * リクエストのパラメーターを作成。
          * "Content-Type": "application/x-www-form-urlencoded" は
          * "key1=value1&key2=value2" の形のデータが必要。
          */
-        const params = new URLSearchParams();
-        params.append("grant_type", "refresh_token");
-        params.append("refresh_token", refreshToken);
-        params.append("client_id", this.clientId);
-        params.append("client_secret", this.clientSecret);
+        const parameters = new URLSearchParams();
+        parameters.append("grant_type", "authorization_code");
+        parameters.append("code", this.getUrlParameter("code"));
+        parameters.append("redirect_uri", this.webServerDomain);
+        parameters.append("client_id", this.clientId);
 
-        // axios.post(url, data, config)
-        this.$axios
-          .post(`${this.authorizeServerDomain}/oauth/token`, params, {
-            headers: {
-              "Content-Type": "application/x-www-form-urlencoded",
-              // btoa(): Base64 にエンコード、デコードは atob()
-              Authorization: `Basic ${btoa(
-                `${this.clientId}:${this.clientSecret}`
-              )}`
-            }
-          })
-          .then(response => {
-            console.log("アクセストークンを更新する。");
-            localStorage.setItem("access_token", response.data.access_token);
-          })
-          .catch(error => console.log(error));
-      } else {
-        clearInterval(this.refreshTokenTimer);
-        console.log("トークンが無効になりました。");
+        // 認証サーバーにトークンを請求する。
+        const [accessToken, refreshToken] = await this.sendGetTokenRequest(
+          parameters
+        );
+
+        // トークンを local storage に保存する。
+        localStorage.setItem("access_token", accessToken);
+        localStorage.setItem("refresh_token", refreshToken);
+
+        // アドレス欄をパラメーター無しの状態に戻す（遷移が発生する）。
+        window.location = this.webServerDomain;
+      } catch (error) {
+        console.log(error);
+      }
+    },
+
+    async sendRefreshTokenRequest() {
+      try {
+        // アクセストークンの更新トークンを取得。
+        const refreshToken = localStorage.getItem("refresh_token");
+
+        // 更新トークンが存在する場合、アクセストークンを更新する；存在しない場合は更新タイマーを停止する。
+        if (refreshToken) {
+          /**
+           * リクエストのパラメーターを作成。
+           * "Content-Type": "application/x-www-form-urlencoded" は
+           * "key1=value1&key2=value2" の形のデータが必要。
+           */
+          const parameters = new URLSearchParams();
+          parameters.append("grant_type", "refresh_token");
+          parameters.append("refresh_token", refreshToken);
+          parameters.append("client_id", this.clientId);
+          parameters.append("client_secret", this.clientSecret);
+
+          // 認証サーバーにトークンを請求する。
+          const [accessToken] = await this.sendGetTokenRequest(parameters);
+
+          // 更新されたトークンを local storage に保存する。
+          localStorage.setItem("access_token", accessToken);
+          console.log("アクセストークンを更新した。");
+        } else {
+          clearInterval(this.refreshTokenTimer);
+          console.log("トークンが無効になりました。");
+        }
+      } catch (error) {
+        console.log(error);
       }
     },
 
@@ -162,7 +177,7 @@ export default {
   // html の描画完了後に実行される。
   mounted() {
     if (window.location.search.includes("code")) {
-      this.sendGetTokenRequest();
+      this.getToken();
     }
 
     if (localStorage.getItem("access_token")) {
