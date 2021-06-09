@@ -82,7 +82,7 @@ export default {
       return target.split("=")[1];
     },
 
-    // async / await でコールバック地獄を消滅
+    // async / await でコールバック地獄を回避
     async sendGetTokenRequest(parameters) {
       // axios.post(url, data, config)
       const response = await this.$axios.post(
