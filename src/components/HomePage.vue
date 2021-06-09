@@ -131,7 +131,7 @@ export default {
       }
     },
 
-    async sendRefreshTokenRequest() {
+    async refreshToken() {
       try {
         // アクセストークンの更新トークンを取得。
         const refreshToken = localStorage.getItem("refresh_token");
@@ -183,7 +183,7 @@ export default {
     if (localStorage.getItem("access_token")) {
       // 一定時間毎に refresh_token で access_token を更新
       this.refreshTokenTimer = setInterval(() => {
-        this.sendRefreshTokenRequest();
+        this.refreshToken();
       }, 4000);
 
       this.resetTokenTimeoutTimer();
