@@ -1,7 +1,8 @@
 version: 2.1
 
 orbs:
-  aws-s3: circleci/aws-s3@2.0.0
+  aws-s3: circleci/aws-s3@1.0.11
+
 
 executors:
   default:
@@ -40,7 +41,8 @@ jobs:
           command: API_ID=$API_ID API_TOKEN=$API_TOKEN npm run build
       - aws-s3/sync:
           from: dist
-          to: s3://circieci-s3-test/dist
+          to: s3://circieci-s3-test
+          overwrite: true
 
 
 workflows:
