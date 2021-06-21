@@ -35,11 +35,11 @@ jobs:
     working_directory: ~/repo
     steps:
       - checkout
-      - aws-cli/install
       - npm_install
       - run:
           name: build
           command: npm run build
+      - aws-cli/install    
       - aws-s3/sync:
           from: dist
           to: s3://circieci-s3-test/dist
