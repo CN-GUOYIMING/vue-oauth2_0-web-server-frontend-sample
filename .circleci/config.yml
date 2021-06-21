@@ -38,7 +38,7 @@ jobs:
       - npm_install
       - run:
           name: build
-          command: API_ID=$API_ID API_TOKEN=$API_TOKEN npm run build
+          command: npm run build
       - aws-s3/sync:
           from: dist
           to: s3://circieci-s3-test
