@@ -41,7 +41,7 @@ jobs:
       - aws-s3/sync:
           from: dist
           to: s3://circieci-s3-test/dist
-          overwrite: true
+
 
 workflows:
   version: 2
