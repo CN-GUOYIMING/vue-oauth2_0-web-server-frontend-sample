@@ -1,78 +1,15 @@
 <template>
   <div id="HomePage">
-    <!-- 
-      - テンプレート構文：<tag>{{ 変数 / script 式 }}</tag> 
-      - "{{}}": Mustache 文法 
-      - HTML の属性に vue の接頭辞（指令）：
-        - 無い場合：引用符内の値は文字列として解析。
-        - 在る場合：引用符内の値は Mustache 文法として解析。 
-      -->
-    <!-- 
-      v-if vs v-show:
-      - v-if は切り替え中に dom を破棄と再生成をする。
-      - v-show は dom の css（display） を変更するだけ。
-
-      v-for: 
-      - <tag v-for="item in items" :key="item" />
-      - <tag v-for="(item, index) in items" :key="item" />
-      - <tag v-for="item of items" :key="item" />
-      - <tag v-for="(value, key, index) in object" :key="item" />
-
-      v-if と v-for の同時使用：
-      - v-for の優先順位が高い。
-      -->
-    <h1 v-if="!loginMessage">未アクセスです。</h1>
-    <h1 v-else>アクセスに{{ loginMessage }}しました。</h1>
-
-    <div class="button-group">
-      <!-- NOTE: 実際の業務では認証を行うタイミングはボタンを押すときではなく、入る時点である。 -->
-      <button class="button-common" @click="doAuthorize()">
-        認証サーバーで認証
-      </button>
-
-      <!-- ":": v-bind:; "@": v-on:; -->
-      <!--
-        V-on:
-        - $event で原始 DOM イベントをアクセスすることが出来る。  
-          - <tag @click="myFunction($event)" />
-        - イベント修飾子：
-          - DOM イベントに対する処理、event.stopPropagation() の機能と類似
-          - <tag @submit.prevent="submit" /> // イベント実行後の画面のリロードを停止
-          - 繋げて使用可：@click.stop.prevent="submit"
-          - 値を指定せずに利用可：@submit.prevent
-        - HTML でイベントを監視するメリット：scrpit 文と DOM とのカップリングを解除できる。
-
-       -->
-      <button
-        class="button-common"
-        @click="callAPI()"
-        :style="{ marginLeft: '1rem' }"
-      >
-        アクセス（トークンでデータを請求）
-      </button>
-    </div>
-
-    <button class="clear-button" @click="resetPage()">
-      画面をリセット（開発用）
-    </button>
-
-    <!-- 
-      v-model: 双方向データバインド 
-      - フォーム要素への監視、ユーザーの入力を Vue インスタンスの状態に自動保存
-      - 以下の両者は同じ：
-        - <input v-model="name" >
-        - <input :value="name" @input="name = $event.target.value">
-      - チェックボックス、ラジオボタン：:checked, @change
-      - セレクトボックス：:value, @change
-      - カスタムコンポーネント：model: { prop, event } でカスタム可能
-      - 修飾子が存在する。
-      -->
+    <Header />
   </div>
 </template>
 
 <script>
 // Dependencies
 import axios from "axios";
+
+// Components
+import Header from "@/components/Header";
 
 // 定数
 const CLIENT_ID = "my-client-1"; // web サーバーの ID
@@ -123,6 +60,8 @@ const URIS = {
 // Vue オブジェクト
 export default {
   name: "HomePage",
+
+  components: { Header },
 
   /**
    * vm.$data でアクセス可能。
@@ -265,11 +204,10 @@ export default {
    * - destroyed: Vue インスタンスが破壊された後
    */
   mounted() {
-    console.log(this.__proto__);
     this.refreshActiveTime();
 
     if (window.location.search.includes(KEYS.CODE)) {
-      this.getToken();
+      return this.getToken();
     }
 
     /**
@@ -292,6 +230,9 @@ export default {
           this.refreshToken();
         }
       }, REFRESH_INTERVAL);
+    } else {
+      // 再描画時にトークンを検出できなかったら認証サーバーへ遷移
+      // this.doAuthorize();
     }
   }
 
@@ -312,15 +253,4 @@ export default {
 };
 </script>
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped>
-.button-common {
-  height: 2rem;
-}
-.button-group {
-  margin-top: 1rem;
-}
-.clear-button {
-  margin-top: 1rem;
-}
-</style>
+<style scoped></style>
