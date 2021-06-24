@@ -14,7 +14,4 @@ export default {
 * {
   display: flex;
 }
-#app {
-  flex: 1;
-}
 </style>

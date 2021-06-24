@@ -250,5 +250,6 @@ export default {
 #HomePage {
   flex-direction: column;
   overflow: hidden;
+  flex: 1;
 }
 </style>
