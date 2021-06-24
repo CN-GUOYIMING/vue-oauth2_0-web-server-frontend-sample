@@ -222,7 +222,7 @@ export default {
       }, REFRESH_INTERVAL);
     } else {
       // 再描画時にトークンを検出できなかったら認証サーバーへ遷移
-      // this.doAuthorize();
+      this.doAuthorize();
     }
   }
 
