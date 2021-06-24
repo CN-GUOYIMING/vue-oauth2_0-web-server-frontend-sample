@@ -41,7 +41,7 @@ jobs:
           command: npm run build
       - aws-s3/sync:
           from: dist
-          to: s3://circieci-s3-test
+          to: s3://dev-portal-cloudfront
           overwrite: true
 
 
