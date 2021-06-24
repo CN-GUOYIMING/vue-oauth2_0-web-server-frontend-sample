@@ -1,6 +1,9 @@
 <template>
-  <div id="HomePage">
+  <div id="HomePage" @click="refreshActiveTime()">
     <Header />
+    <Topic />
+    <Story />
+    <Footer />
   </div>
 </template>
 
@@ -10,6 +13,9 @@ import axios from "axios";
 
 // Components
 import Header from "@/components/Header";
+import Topic from "@/components/Topic";
+import Story from "@/components/Story";
+import Footer from "@/components/Footer";
 
 // 定数
 const CLIENT_ID = "my-client-1"; // web サーバーの ID
@@ -61,7 +67,7 @@ const URIS = {
 export default {
   name: "HomePage",
 
-  components: { Header },
+  components: { Header, Topic, Story, Footer },
 
   /**
    * vm.$data でアクセス可能。
@@ -69,8 +75,6 @@ export default {
    */
   data() {
     return {
-      loginMessage: "",
-      timeoutTimer: null,
       refreshTokenTimer: null
     };
   },
@@ -82,20 +86,6 @@ export default {
 
     doAuthorize() {
       window.location = URIS.AUTHORIZE;
-    },
-
-    callAPI() {
-      this.refreshActiveTime();
-
-      // NOTE: トークンによる請求を模擬
-      this.loginMessage = localStorage.getItem(KEYS.ACCESS_TOKEN)
-        ? "成功"
-        : "失敗";
-    },
-
-    resetPage() {
-      localStorage.clear();
-      window.location = this.webServerDomain;
     },
 
     getUrlParameter(parameterName) {
@@ -253,4 +243,12 @@ export default {
 };
 </script>
 
-<style scoped></style>
+<style scoped>
+* {
+  display: flex;
+}
+#HomePage {
+  flex-direction: column;
+  overflow: hidden;
+}
+</style>

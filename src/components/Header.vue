@@ -1,6 +1,6 @@
 <template>
-  <header id="Header" class="header">
-    <section class="left-side-item">
+  <header id="Header">
+    <section class="left-side-items-container">
       <section class="caution">
         試験まで
         <h2 :style="{ color: '#8dc4ef', margin: 0 }">{{ examLeftDate }}</h2>
@@ -8,16 +8,16 @@
       </section>
 
       <section class="score">
-        <div :style="{ alignItems: 'baseline' }">
+        <section :style="{ alignItems: 'baseline' }">
           平均得点
           <h2 :style="{ color: '#fff', margin: '0 0 0 1rem' }">{{ score }}</h2>
           点
-        </div>
+        </section>
 
-        <div class="achievement-degree">
+        <section class="achievement-degree">
           達成度
 
-          <section class="achievement-degree-line">
+          <div class="achievement-degree-line">
             <div
               :style="{
                 backgroundColor: 'yellow',
@@ -25,22 +25,53 @@
                 flex: 0.6
               }"
             />
-          </section>
-        </div>
+          </div>
+        </section>
       </section>
+    </section>
+
+    <section class="navigation-buttons-container">
+      <NavigationButton
+        v-for="icon in icons"
+        :key="icon.path"
+        :icon="icon"
+        :style="{ marginLeft: '1rem' }"
+      />
     </section>
   </header>
 </template>
 
 <script>
+// Components
+import NavigationButton from "@/components/NavigationButton";
+
+// Icons
+import home from "@/assets/icon/home.png";
+import diary from "@/assets/icon/diary.png";
+import library from "@/assets/icon/library.png";
+import live from "@/assets/icon/live.png";
+import myPage from "@/assets/icon/myPage.png";
+
 // 定数
 const EXAM_LEFT_DATE = 123;
 const SCORE = 62;
 
 // Vue インスタンス
 export default {
+  components: { NavigationButton },
+
   data() {
-    return { examLeftDate: EXAM_LEFT_DATE, score: SCORE };
+    return {
+      examLeftDate: EXAM_LEFT_DATE,
+      score: SCORE,
+      icons: [
+        { path: home, title: "ホーム" },
+        { path: library, title: "ライブラリー" },
+        { path: live, title: "ライブ配信" },
+        { path: diary, title: "ダイアリー" },
+        { path: myPage, title: "マイページ" }
+      ]
+    };
   }
 };
 </script>
@@ -50,11 +81,11 @@ export default {
   display: flex;
   padding: 0;
 }
-.header {
+#Header {
   align-items: center;
   background-color: #0d3f67;
-  flex: 1;
-  height: 6rem;
+  flex-direction: row;
+  height: 7rem;
   justify-content: space-between;
   padding: 0 3rem;
 }
@@ -70,10 +101,10 @@ export default {
 }
 .score {
   color: #fff;
+  flex: 1;
   flex-direction: column;
   justify-content: center;
   margin-left: 3rem;
-  padding: 0;
 }
 .achievement-degree {
   align-items: center;
@@ -86,5 +117,8 @@ export default {
   flex: 1;
   height: 0.6rem;
   margin-left: 1rem;
+}
+.navigation-buttons-container {
+  justify-content: space-around;
 }
 </style>

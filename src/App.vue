@@ -10,4 +10,11 @@ export default {
 };
 </script>
 
-<style></style>
+<style scoped>
+* {
+  display: flex;
+}
+#app {
+  flex: 1;
+}
+</style>
