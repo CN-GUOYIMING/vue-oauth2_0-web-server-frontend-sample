@@ -20,5 +20,6 @@ new Vue({
   el: "#app",
   router,
   components: { App },
-  template: "<App/>"
+  // index.html で書かなくて済むようにする
+  template: "<App />"
 });
