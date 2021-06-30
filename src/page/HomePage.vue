@@ -18,7 +18,7 @@ import Story from "@/components/Story";
 import Footer from "@/components/Footer";
 
 // 定数
-const CLIENT_ID = "my-client-1"; // web サーバーの ID
+const CLIENT_ID = "oauth2"; // web サーバーの ID
 const CLIENT_SECRET = "12345678"; // web サーバーの パス
 
 const CHARSET = {
@@ -27,6 +27,7 @@ const CHARSET = {
 
 const DOMAINS = {
   AUTHORIZE_SERVER: "http://localhost:8090", // 認証サーバーのドメイン
+  // WEB_SERVER: "http://www.google.com" // NOTE: web サーバーのドメインのバックエンドのデフォルト設定
   WEB_SERVER: "http://localhost:8081" // web サーバーのドメイン
 };
 
