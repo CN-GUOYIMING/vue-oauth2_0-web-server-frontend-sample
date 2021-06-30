@@ -41,7 +41,7 @@ jobs:
           command: npm run build
       - aws-s3/sync:
           from: dist
-          to: s3://$S3
+          to: s3://$S3_NAME
           overwrite: true
 
 
