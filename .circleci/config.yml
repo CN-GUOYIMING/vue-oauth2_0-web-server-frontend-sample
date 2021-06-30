@@ -47,7 +47,7 @@ jobs:
 
 workflows:
   version: 2
-  continuous-deploy:
+  s3-deploy:
     jobs:
       - build
       - deploy:
@@ -55,4 +55,4 @@ workflows:
             - build
           filters:
             branches:
-              ignore: main
+              only: main
