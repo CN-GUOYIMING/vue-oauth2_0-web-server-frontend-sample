@@ -134,10 +134,6 @@ export default {
         parameters.append(KEYS.REDIRECT_URI, DOMAINS.WEB_SERVER);
         parameters.append(KEYS.CLIENT_ID, CLIENT_ID);
 
-        for (let key of parameters.keys()) {
-          console.log(`key: ${key}, value: ${parameters.get(key)}`);
-        }
-
         // 認証サーバーにトークンを請求する。
         const [accessToken, refreshToken] = await this.sendGetTokenRequest(
           parameters
