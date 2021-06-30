@@ -19,7 +19,7 @@ import Footer from "@/components/Footer";
 
 // 定数
 const CLIENT_ID = "oauth2"; // web サーバーの ID
-const CLIENT_SECRET = "12345678"; // web サーバーの パス
+const CLIENT_SECRET = "oauth2"; // web サーバーの パス
 
 const CHARSET = {
   CONTENT_TYPE: "utf-8" // 請求で送るデータのコーディング方式
@@ -27,7 +27,6 @@ const CHARSET = {
 
 const DOMAINS = {
   AUTHORIZE_SERVER: "http://localhost:8090", // 認証サーバーのドメイン
-  // WEB_SERVER: "http://www.google.com" // NOTE: web サーバーのドメインのバックエンドのデフォルト設定
   WEB_SERVER: "http://localhost:8081" // web サーバーのドメイン
 };
 
@@ -56,6 +55,10 @@ const MARKS = {
 const RESPONSE_TYPE = "code"; // 認証コードモード
 const SEND_DATA_FORMAT = "x-www-form-urlencoded"; // key=value&...のフォーマット
 
+/**
+ * NOTE: ここの更新時間及びタイムアウト時間は説明する為に短く設定したが、
+ *       実際の業務では変更する必要がある。
+ */
 const REFRESH_INTERVAL = 4000; // アクセストークンの自動更新間隔
 const TIMEOUT_TIME = 5000; // トークンのタイムアウト時間
 
@@ -131,6 +134,10 @@ export default {
         parameters.append(KEYS.REDIRECT_URI, DOMAINS.WEB_SERVER);
         parameters.append(KEYS.CLIENT_ID, CLIENT_ID);
 
+        for (let key of parameters.keys()) {
+          console.log(`key: ${key}, value: ${parameters.get(key)}`);
+        }
+
         // 認証サーバーにトークンを請求する。
         const [accessToken, refreshToken] = await this.sendGetTokenRequest(
           parameters
@@ -172,6 +179,9 @@ export default {
 
         // 更新されたトークンを local storage に保存する。
         localStorage.setItem(KEYS.ACCESS_TOKEN, accessToken);
+
+        // 開発時提示用
+        console.log("トークンを更新した。", { accessToken });
       } catch (error) {
         console.log(error);
       }
@@ -209,6 +219,14 @@ export default {
      * タイムアウトの場合、トークンをクリアする。
      */
     if (localStorage.getItem(KEYS.ACCESS_TOKEN)) {
+      // 開発時提示用
+      if (localStorage.getItem(KEYS.REFRESH_TOKEN)) {
+        console.log("トークンを取得した。", {
+          refreshToken: localStorage.getItem(KEYS.REFRESH_TOKEN),
+          accessToken: localStorage.getItem(KEYS.ACCESS_TOKEN)
+        });
+      }
+
       const refreshTokenTimer = setInterval(() => {
         const thisActiveTime = new Date().getTime();
         const lastActiveTime = localStorage.getItem(KEYS.LAST_ACTIVE_TIME);
@@ -217,6 +235,7 @@ export default {
         if (isTimeout) {
           this.clearToken();
           clearInterval(refreshTokenTimer);
+          console.log("トークンをクリアした。");
         } else {
           this.refreshToken();
         }
