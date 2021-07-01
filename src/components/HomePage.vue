@@ -75,7 +75,7 @@
 import axios from "axios";
 
 // 定数
-const CLIENT_ID = "my-client-1"; // web サーバーの ID
+const CLIENT_ID = "oauth2"; // web サーバーの ID
 const CLIENT_SECRET = "12345678"; // web サーバーの パス
 
 const CHARSET = {
@@ -83,8 +83,8 @@ const CHARSET = {
 };
 
 const DOMAINS = {
-  AUTHORIZE_SERVER: "http://localhost:8090", // 認証サーバーのドメイン
-  WEB_SERVER: "http://localhost:8081" // web サーバーのドメイン
+  AUTHORIZE_SERVER: "https://auth.dev.shikaku-app.jp", // 認証サーバーのドメイン
+  WEB_SERVER: "https://api.dev.shikaku-app.jp" // web サーバーのドメイン
 };
 
 const GRANT_TYPES = {
@@ -181,7 +181,8 @@ export default {
         headers: {
           "Content-Type": `application/${SEND_DATA_FORMAT};charset=${CHARSET.CONTENT_TYPE}`,
           // btoa(): Base64 にエンコード、デコードは atob()
-          Authorization: `Basic ${btoa(`${CLIENT_ID}:${CLIENT_SECRET}`)}`
+          //Authorization: `Basic ${btoa(`${CLIENT_ID}:${CLIENT_SECRET}`)}`
+          "Authorization": `Basic b2F1dGgyOm9hdXRoMg==`
         }
       });
 
