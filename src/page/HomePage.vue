@@ -27,7 +27,7 @@ const CHARSET = {
 
 const DOMAINS = {
   AUTHORIZE_SERVER: "https://auth.dev.shikaku-app.jp", // 認証サーバーのドメイン
-  WEB_SERVER: "https%3A%2F%2Fwww.dev.shikaku-app.jp" // web サーバーのドメイン
+  WEB_SERVER: "www.dev.shikaku-app.jp" // web サーバーのドメイン
 };
 
 const GRANT_TYPES = {
