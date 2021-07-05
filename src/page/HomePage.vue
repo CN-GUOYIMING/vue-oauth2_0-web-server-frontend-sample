@@ -12,10 +12,10 @@
 import axios from "axios";
 
 // Components
-import Header from "@/components/Header";
-import Topic from "@/components/Topic";
-import Story from "@/components/Story";
-import Footer from "@/components/Footer";
+import Header from "@/components/HomePage/Header";
+import Topic from "@/components/HomePage/Topic";
+import Story from "@/components/HomePage/Story";
+import Footer from "@/components/HomePage/Footer";
 
 // 定数
 const CLIENT_ID = "oauth2"; // web サーバーの ID
