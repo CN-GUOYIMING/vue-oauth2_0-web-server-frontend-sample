@@ -16,8 +16,9 @@
       <section
         class="eye_container"
         :style="{ backgroundColor: iconBackgroundColor }"
+        @click="setIsShowPassword()"
       >
-        <span><img :src="iconEye" @click="setIsShowPassword()"/></span>
+        <span><img :src="iconEye"/></span>
       </section>
     </section>
   </section>
