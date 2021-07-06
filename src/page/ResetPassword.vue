@@ -12,57 +12,75 @@
 
         <h2>パスワードを再設定</h2>
         <form class="form">
-          <input
-            class="textBox"
-            type="text"
-            :value="userName"
-            disabled
-            :style="{ marginTop: '0' }"
-          />
+          <section class="inputBox">
+            <input
+              class="textBox"
+              type="text"
+              :value="userName"
+              maxlength="128"
+              disabled
+              :style="{ marginTop: '0' }"
+            />
+          </section>
 
-          <input
-            class="textBox"
-            type="password"
-            v-model="password"
-            placeholder="現在のパスワード"
-          />
+          <section class="inputBox">
+            <input
+              class="textBox"
+              type="password"
+              v-model="password"
+              placeholder="現在のパスワード"
+              maxlength="128"
+            />
+          </section>
 
           <p class="error" v-show="errorMessage.password">
             {{ errorMessage.password }}
           </p>
 
-          <input
+          <PasswordInput v-model="newPassword" :placeholder="'新パスワード'" />
+
+          <!-- チェックボックス式 -->
+          <!-- <input
             class="textBox"
             :type="newPasswordShowType"
             v-model="newPassword"
             placeholder="新パスワード"
+            maxlength="128"
           />
 
           <label class="chekbox-container">
             <input type="checkbox" v-model="isShowNewPassword" />
             新パスワードを表示する
-          </label>
+          </label> -->
 
           <p class="error" v-show="errorMessage.newPassword">
             {{ errorMessage.newPassword }}
           </p>
 
-          <input
+          <PasswordInput
+            v-model="newPasswordConfirm"
+            :placeholder="'新パスワード（確認用）'"
+          />
+
+          <!-- チェックボックス式 -->
+          <!-- <input
             class="textBox"
             :type="newPasswordConfirmShowType"
             v-model="newPasswordConfirm"
             placeholder="新パスワード（確認用）"
+            maxlength="128"
           />
 
           <label class="chekbox-container">
             <input type="checkbox" v-model="isShowNewPasswordConfirm" />
             新パスワード（確認用）を表示する
-          </label>
+          </label> -->
 
           <p class="error" v-show="errorMessage.newPasswordConfirm">
             {{ errorMessage.newPasswordConfirm }}
           </p>
 
+          <!-- TODO: 利用規約及びプライバシーポリシーへの遷移 -->
           <p class="note">
             <a href="" alt="#">利用規約</a>
             ・
@@ -93,9 +111,32 @@
 </template>
 
 <script>
+// Components
+import PasswordInput from "@/components/ResetPassword/PasswordInput";
+
+// Const
+const TEXT_MAX_LENGTH = 16; // 最大入力文字数
+const TEXT_MIN_LENGTH = 6; // 最小入力文字数
+const KEYWORD_FOR_FILTER_VALIDATION_DATA = "password"; // 確認用のデータをフィルターする為のキーワード
+
+const INPUT_TYPE = {
+  TEXT: "text", // input タグの type 属性を text に
+  PASSWORD: "password" // input タグの type 属性を password に
+};
+
+const ERROR = {
+  WRONG_TEXT_LENGTH: "EX0002: パスワードは 6 ~ 16 桁で入力してください。", // 文字数エラー
+  WRONG_TEXT: "EC0003: パスワードは英数字のみで入力してください。", // 記号が存在する
+  PASSWORD_NOT_MATCH: "新パスワードが一致していません。", // 新パスワードが一致しない
+  EMPTY_EXIST: "未入力の項目が存在します。", // 未入力項目が存在する
+  DEFAULT: "エラーが存在します。" // エラーの存在を提示
+};
+
 export default {
+  components: { PasswordInput },
   data() {
     return {
+      // TODO: ユーザーを特定するユーザーネームを受け取る。
       userName: "user", // ユーザーに確認用、前のページから受け取る
       password: "",
       newPassword: "",
@@ -113,17 +154,104 @@ export default {
 
   computed: {
     newPasswordShowType() {
-      return this.isShowNewPassword ? "text" : "password";
+      return this.isShowNewPassword ? INPUT_TYPE.TEXT : INPUT_TYPE.PASSWORD;
     },
 
     newPasswordConfirmShowType() {
-      return this.isShowNewPasswordConfirm ? "text" : "password";
+      return this.isShowNewPasswordConfirm
+        ? INPUT_TYPE.TEXT
+        : INPUT_TYPE.PASSWORD;
     }
   },
 
   methods: {
     sendForm() {
-      console.log("TODO: Send form to API");
+      // エラーメッセージをリセット
+      const errors = this.errorMessage;
+      Object.keys(errors).forEach(key => (errors[key] = ""));
+
+      // エラーチェック
+      if (this.checkIsErrorExist()) {
+        console.log(ERROR.DEFAULT);
+      } else {
+        const dataForSend = this.getFinalData();
+
+        // TODO: API に dataForSend を送る。
+        console.log(dataForSend);
+      }
+    },
+
+    checkIsErrorExist() {
+      let isErrorExist = false;
+      const passwordTextRegExp = /^[a-zA-Z0-9]+$/;
+      const errors = this.errorMessage;
+
+      // 空白が存在するかをチェック
+      Object.keys(this.$data).forEach(key => {
+        if (key.toLowerCase().includes(KEYWORD_FOR_FILTER_VALIDATION_DATA)) {
+          if (this.$data[key] === "") {
+            errors.whole = ERROR.EMPTY_EXIST;
+          }
+        }
+      });
+
+      // TODO：現在のパスワードに間違いが無いかをチェック
+
+      // 新パスワードの字数をチェック
+      if (
+        this.newPassword.length < TEXT_MIN_LENGTH ||
+        this.newPassword.length > TEXT_MAX_LENGTH
+      ) {
+        errors.newPassword = ERROR.WRONG_TEXT_LENGTH;
+      }
+
+      // 新パスワードの記号をチェック
+      if (!passwordTextRegExp.test(this.newPassword)) {
+        errors.newPassword = ERROR.WRONG_TEXT;
+      }
+
+      // 新パスワード（確認用）の字数をチェック
+      if (
+        this.newPasswordConfirm.length < TEXT_MIN_LENGTH ||
+        this.newPasswordConfirm.length > TEXT_MAX_LENGTH
+      ) {
+        errors.newPasswordConfirm = ERROR.WRONG_TEXT_LENGTH;
+      }
+
+      // 新パスワード（確認用）の記号をチェック
+      if (!passwordTextRegExp.test(this.newPasswordConfirm)) {
+        errors.newPasswordConfirm = ERROR.WRONG_TEXT;
+      }
+
+      // 新パスワードと新パスワード（確認用）が一致するかをチェック
+      if (this.newPassword !== this.newPasswordConfirm) {
+        errors.whole = ERROR.PASSWORD_NOT_MATCH;
+      }
+
+      // エラーが存在すると戻す値を真に変更
+      Object.keys(errors).forEach(key => {
+        if (errors[key] !== "") {
+          isErrorExist = true;
+        }
+      });
+
+      return isErrorExist;
+    },
+
+    getFinalData() {
+      const data = this.$data;
+      const newData = {};
+
+      newData.userName = data.userName;
+      newData.password = data.password;
+      newData.newPassword = data.newPassword;
+
+      // 前後の空白を削除
+      Object.keys(newData).forEach(key => {
+        newData[key] = newData[key].trim();
+      });
+
+      return newData;
     }
   }
 };
@@ -133,7 +261,7 @@ export default {
 @import "~@/assets/stylus/index"
 
 /** Mixins */
-useFlex($direction = row, $mainAxis = null, $subAxis = null) {
+use-flex($direction = row, $mainAxis = null, $subAxis = null) {
   align-items: $subAxis;
   display: flex;
   flex-direction: $direction;
@@ -163,7 +291,7 @@ input::-moz-placeholder {
 }
 
 .background {
-  useFlex(column, space-between, center);
+  use-flex(column, space-between, center);
   background-image: url("~@/assets/img/login_bg.png");
   background-position : center;
   background-size: cover;
@@ -171,15 +299,15 @@ input::-moz-placeholder {
   width: 100%;
 
   .content-container {
-    useFlex(column, , center);
+    use-flex(column, , center);
     max-width: 600px;
     margin: 0 auto;
     padding: 80px 0px 0px;
 
     .reset-password_container {
-      useFlex(column);
+      use-flex(column);
       flex: 1;
-      margin-top: 35px
+      margin-top: 35px;
       width: 100%;
 
       h2 {
@@ -189,37 +317,44 @@ input::-moz-placeholder {
       }
 
       form {
-        useFlex(column);
+        use-flex(column, center, center);
+        flex-wrap: wrap;
         margin-top: 25px;
         z-index: 2;
 
-        .textBox {
-          text-style(#fff, 12px, 260);
-          background-color: rgba(255, 255, 255, 0.2);
-          outline: 0;
-          border: 1px solid rgba(255, 255, 255, 0.4);
-          border-radius: 5px;
+        .inputBox {
+          use-flex();
+          flex: 1;
           height: 50px;
-          text-align: left;
-          padding: 0px 15px;
-          margin: 20px auto 0 auto;
-          display: block;
           width: 260px;
-          -webkit-appearance: none;
-             -moz-appearance: none;
-                  appearance: none;
-          -webkit-transition-duration: 0.25s;
-                  transition-duration: 0.25s;
 
-          &:hover {
-            background-color: fade(#fff, 40%);
-          }
+          .textBox {
+            text-style(#fff, 12px, 260);
+            background-color: rgba(255, 255, 255, 0.2);
+            outline: 0;
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            border-radius: 5px;
+            height: 50px;
+            text-align: left;
+            padding: 0px 15px;
+            margin: 20px auto 0 auto;
+            width: 100%;
+            -webkit-appearance: none;
+              -moz-appearance: none;
+                    appearance: none;
+            -webkit-transition-duration: 0.25s;
+                    transition-duration: 0.25s;
 
-          &:focus {
-            background-color: #fff;
-            color: #333;
-            font-size: 16px;
-            width: 260px;
+            &:hover {
+              background-color: fade(#fff, 40%);
+            }
+
+            &:focus {
+              background-color: #fff;
+              color: #333;
+              font-size: 16px;
+              width: 260px;
+            }
           }
         }
 
@@ -274,7 +409,7 @@ input::-moz-placeholder {
   }
 
   footer {
-    useFlex(column, , center)
+    use-flex(column, , center)
     background-color: #0d3f67;
     height: 100vh;
     margin-top: 75px;
