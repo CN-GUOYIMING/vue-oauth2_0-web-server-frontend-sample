@@ -137,7 +137,7 @@ export default {
   data() {
     return {
       // TODO: ユーザーを特定するユーザーネームを受け取る。
-      userName: "user", // ユーザーに確認用、前のページから受け取る
+      userName: "dummyUser0001", // ユーザーに確認用、前のページから受け取る
       password: "",
       newPassword: "",
       isShowNewPassword: false,
