@@ -9,7 +9,7 @@
           maxlength="128"
           @input="$emit('input', $event.target.value)"
           @focus="setIconBackgroundColor('#fff')"
-          @blur="setIconBackgroundColor('rgba(255, 255, 255, 0.2)')"
+          @blur="handleInputBoxOnBlur()"
         />
       </section>
 
@@ -37,7 +37,7 @@ const INPUT_TYPE = {
 };
 
 export default {
-  props: ["value", "placeholder"],
+  props: ["value", "placeholder", "checkIsErrorExist"],
   data() {
     return {
       iconBackgroundColor: ICON_DEFAULT_BACKGROUND_COLOR,
@@ -58,6 +58,12 @@ export default {
     },
     setIsShowPassword() {
       this.isShowPassword = !this.isShowPassword;
+    },
+    handleInputBoxOnBlur() {
+      this.setIconBackgroundColor(ICON_DEFAULT_BACKGROUND_COLOR);
+
+      // イベントをカスタマイズする。最初の引数はカスタマイズできるイベント名。
+      this.$emit("blur");
     }
   }
 };
@@ -100,7 +106,7 @@ text-style($color = #000, $size = null, $weight = normal) {
       flex: 1
       height: 100%;
       outline: 0;
-      padding: 0px 15px;
+      padding: 0 0 0 15px;
       text-align: left;
       -webkit-appearance: none;
          -moz-appearance: none;
@@ -122,12 +128,13 @@ text-style($color = #000, $size = null, $weight = normal) {
 
   .eye_container {
     use-flex(, center, center);
-    border: .1px solid rgba(255, 255, 255, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.4);
     border-left : 0
     border-radius: 0 5px 5px 0;
     flex: .15
     height: 100%;
     outline: 0;
+    padding: 0 15px 0 0;
     -webkit-transition-duration: 0.25s;
             transition-duration: 0.25s;
   }

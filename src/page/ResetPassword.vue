@@ -30,6 +30,7 @@
               v-model="password"
               placeholder="現在のパスワード"
               maxlength="128"
+              @blur="checkIsErrorExist()"
             />
           </section>
 
@@ -37,7 +38,11 @@
             {{ errorMessage.password }}
           </p>
 
-          <PasswordInput v-model="newPassword" :placeholder="'新パスワード'" />
+          <PasswordInput
+            v-model="newPassword"
+            :placeholder="'新パスワード'"
+            @blur="checkIsErrorExist()"
+          />
 
           <!-- チェックボックス式 -->
           <!-- <input
@@ -293,19 +298,20 @@ input::-moz-placeholder {
 .background {
   use-flex(column, space-between, center);
   background-image: url("~@/assets/img/login_bg.png");
-  background-position : center;
+  background-position: center;
   background-size: cover;
-  height: 100vh;
+  flex: 1;
   width: 100%;
 
   .content-container {
-    use-flex(column, , center);
+    use-flex(column, center, center);
+    flex: .8;
     max-width: 600px;
     margin: 0 auto;
-    padding: 80px 0px 0px;
+    padding: 80px 0 0;
 
     .reset-password_container {
-      use-flex(column);
+      use-flex(column, center, center);
       flex: 1;
       margin-top: 35px;
       width: 100%;
@@ -318,7 +324,7 @@ input::-moz-placeholder {
 
       form {
         use-flex(column, center, center);
-        flex-wrap: wrap;
+        // flex-wrap: wrap;
         margin-top: 25px;
         z-index: 2;
 
@@ -411,7 +417,7 @@ input::-moz-placeholder {
   footer {
     use-flex(column, , center)
     background-color: #0d3f67;
-    height: 100vh;
+    flex: .2;
     margin-top: 75px;
     padding: 35px 0;
     width: 100%;
