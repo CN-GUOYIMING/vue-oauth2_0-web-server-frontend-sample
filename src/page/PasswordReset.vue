@@ -15,42 +15,49 @@
           <section class="inputBox">
             <input 
               id="userId"
+              name="userId"
               v-model="user.userId"
               placeholder="ユーザー名"
               type="text"
               class="textBox"
               maxlength="128"
+              v-validate="'required:ユーザー名|alpha_num:ユーザー名|lengthBetween:ユーザー名,6,8'"
             />
+            
           </section>
-          <p class="error" v-show="errorMessage.userId">
-            {{ errorMessage.userId }}
+          <p class="error" v-show="errors.has('userId')">
+            {{ errors.first('userId') }}
           </p>
           <section class="inputBox">
             <input 
               id="mailAddress"
+              name="mailAddress"
               v-model="user.mailAddress"
               placeholder="メールアドレス"
               type="text"
               class="textBox"
               maxlength="128"
+              v-validate="'required:メールアドレス|email:メールアドレス'"
             />
           </section>
-          <p class="error" v-show="errorMessage.mailAddress">
-            {{ errorMessage.mailAddress }}
+          <p class="error" v-show="errors.has('mailAddress')">
+            {{ errors.first('mailAddress') }}
           </p>
           <section class="inputBox">
             <input 
               id="birthday"
+              name="birthday"
               v-model="user.birthday"
               placeholder="生年月日"
               type="text"
               class="textBox"
               maxlength="8"
+              v-validate="'required:生年月日|isLength:生年月日,8|date_format:yyyyMMdd,生年月日'"
             />
           </section>
           <p class="exampleText">入力例)19800101</p>
-          <p class="error" v-show="errorMessage.birthday">
-            {{ errorMessage.birthday }}
+          <p class="error" v-show="errors.has('birthday')">
+            {{ errors.first('birthday') }}
           </p>
 
           <button type="button" @click="sendForm()">
@@ -74,15 +81,6 @@
 
 <script>
 
-  const ERROR = {
-    WRONG_USERID_TEXT_LENGTH: "EC0002: ユーザー名は6~8桁で入力してください。", 
-    WRONG_USERID_TYPE: "EC0001: ユーザー名は半角英数字で入力してください。", 
-    WRONG_MAILADDRESS: "EC0006: 有効なメールアドレスを入力してください。", 
-    WRONG_BIRTHDAY_TYPE: "EC0005: 生年月日は数字で入力してください。", 
-    WRONG_BIRTHDAY_LENGTH: "EC0002: 生年月日は8桁で入力してください。", 
-    WRONG_BIRTHDAY_EXIST: "EC0007: 生年月日は正しい日付を入力してください。", 
-  };
-
   export default {
     data() {
       return {
@@ -95,90 +93,9 @@
           mailAddress: '',
           birthday: '',
         },
-        errorMessage: {
-          userId: "",
-          mailAddress: "",
-          birthday: "",
-        }
       }
     },
     methods: {
-
-      checkUserIdIsErrorExist() {
-        let isUserIdErrorExist = false;
-        const userIdTextRegExp = /^[a-zA-Z0-9]+$/;
-        const errors = this.errorMessage;
-        // Const
-        const TEXT_MAX_LENGTH = 8; // 最大入力文字数
-        const TEXT_MIN_LENGTH = 6; // 最小入力文字数
-        // TODO：ユーザ名をチェック
-        if ( this.user.userId.length < TEXT_MIN_LENGTH ||
-             this.user.userId.length > TEXT_MAX_LENGTH ) {
-          // ユーザ名桁数をチェック
-          errors.userId = ERROR.WRONG_USERID_TEXT_LENGTH;
-          isUserIdErrorExist = true;
-        }else if(!userIdTextRegExp.test(this.user.userId)) {
-          // ユーザ名タイプをチェック
-          errors.userId = ERROR.WRONG_USERID_TYPE;
-          isUserIdErrorExist = true;
-        }
-
-        if(!isUserIdErrorExist){
-          errors.userId = "";
-        }
-        return isUserIdErrorExist;
-      },
-      checkMailAddressIsErrorExist() {
-        let isMailAddressErrorExist = false;
-        const mailAddressTextRegExp = /^[a-zA-Z0-9_.+-]+@([a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9]*\.)+[a-zA-Z]{2,}$/;
-        const errors = this.errorMessage;
-       
-        // TODO：メールアドレスをチェック
-        if (!mailAddressTextRegExp.test(this.user.mailAddress)) {
-          // メールアドレス形式をチェック
-          errors.mailAddress = ERROR.WRONG_MAILADDRESS;
-          isMailAddressErrorExist = true;
-        }
-
-        if(!isMailAddressErrorExist){
-          errors.mailAddress = "";
-        }
-        return isMailAddressErrorExist;
-      },
-      checkBirthdayIsErrorExist() {
-        let isBirthdayErrorExist = false;
-        const birthdayTextRegExp = /^[0-9]{8}$/;
-        const errors = this.errorMessage;
-       
-        // TODO：生年月日をチェック
-        // 生年月日桁数をチェック
-        if ( this.user.birthday.length !== 8 ) {
-          errors.birthday = ERROR.WRONG_BIRTHDAY_LENGTH;
-          isBirthdayErrorExist = true;
-        }else if(!birthdayTextRegExp.test(this.user.birthday)) {
-          // 生年月日形式をチェック
-          errors.birthday = ERROR.WRONG_BIRTHDAY_TYPE;
-          isBirthdayErrorExist = true;
-        }else if(!this.isExistDate(this.user.birthday)){
-          // 生年月日存在チェック
-          errors.birthday = ERROR.WRONG_BIRTHDAY_EXIST;
-          isBirthdayErrorExist = true;
-        }
-
-        if(!isBirthdayErrorExist){
-          errors.birthday = "";
-        }
-        return isBirthdayErrorExist;
-      },
-      isExistDate(yyyymmdd){
-        //年,月,日を取得する
-        let y = parseInt(yyyymmdd.substr(0,4));
-        let m = parseInt(yyyymmdd.substr(4,2)) -1;  //月は0～11で指定するため-1しています。
-        let d = parseInt(yyyymmdd.substr(6,2));
-        let dt = new Date(y, m, d);
-        //判定する
-        return (y == dt.getFullYear() && m == dt.getMonth() && d == dt.getDate());
-      },
       getFinalData() {
         const data = this.$data;
         const newData = {};
@@ -195,22 +112,15 @@
         return newData;
       },
       sendForm() {
-        // エラーメッセージをリセット
-        const errors = this.errorMessage;
-        Object.keys(errors).forEach(key => (errors[key] = ""));
-        this.checkUserIdIsErrorExist();
-        this.checkMailAddressIsErrorExist();
-        this.checkBirthdayIsErrorExist();
-        // エラーチェック
-
-        if (errors.userId !== "" || errors.mailAddress !== "" || errors.birthday !== "") {
-          console.log("error");
-        } else {
-          const dataForSend = this.getFinalData();
-
-          // TODO: API に dataForSend を送る。
-          console.log(dataForSend);
-        }
+        this.$validator.validate().then(valid => {
+          if (!valid) {
+            console.log("error");
+          }else{
+            const dataForSend = this.getFinalData();
+            // TODO: API に dataForSend を送る。
+            console.log(dataForSend);
+          }
+        });
       }
     },
   }
