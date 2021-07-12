@@ -13,10 +13,10 @@
         </div>
       </header>
       <main>
-        <p>読み取り端末にQRコードをかざしてください</p>
+        <p id="qrCodeGuide">読み取り端末にQRコードをかざしてください</p>
 
         <div>
-          <vue-qrcode v-if="targetText" :value="targetText" :options="option" tag="img"></vue-qrcode>
+          <vue-qrcode id="qrCode" v-if="targetText" :value="targetText" :options="option" tag="img"></vue-qrcode>
         </div>
       </main>
     </div>
@@ -35,7 +35,7 @@ export default {
     return {
       targetText: this.$route.params.qrcode,
       option: {
-        errorCorrectionLevel: "M",
+        errorCorrectionLevel: "H",
         maskPattern: 0,
         margin: 4,
         scale: 2,
