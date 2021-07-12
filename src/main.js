@@ -3,7 +3,9 @@
 import Vue from "vue";
 import App from "./App";
 import router from "./router";
+import './config/Validate'
 
+Vue.config.productionTip = false
 /**
  * url に # が付けられた理由：
  * ソース内に xxx のディレクトリが存在しないので、
