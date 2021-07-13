@@ -7,10 +7,10 @@
       </header>
 
       <!-- Main -->
-      <main class="reset-password_container">
+      <main class="password-register_container">
         <!-- Start Sign In Form -->
 
-        <h2>パスワードを再設定</h2>
+        <h2>パスワード登録</h2>
 
         <!-- エラーが最初に表示するバージョン -->
         <!-- <p class="error" v-show="errorMessage.newPassword">
@@ -25,17 +25,6 @@
         </p> -->
 
         <form class="form">
-          <section class="inputBox">
-            <input
-              class="textBox"
-              type="text"
-              :value="userName"
-              maxlength="128"
-              disabled
-              :style="{ marginTop: '0' }"
-            />
-          </section>
-
           <section class="inputBox">
             <input
               class="textBox"
@@ -114,18 +103,12 @@
             {{ errorMessage.newPasswordConfirm }}
           </p> -->
 
-          <!-- TODO: 利用規約及びプライバシーポリシーへの遷移 -->
-          <p class="note">
-            <a href="" alt="#">利用規約</a>
-            ・
-            <a href="" alt="#">プライバシポリシー</a>
-          </p>
-
+          <!-- NOTE:定義書に存在しない入力共通エラーを表示 -->
           <!-- <p class="error_whole" v-show="errorMessage.whole">
             {{ errorMessage.whole }}
           </p> -->
 
-          <button type="button" @click="sendForm()">
+          <button id="register" type="button" @click="sendForm()">
             上記に同意してパスワードを再設定
           </button>
         </form>
@@ -172,7 +155,6 @@ export default {
   data() {
     return {
       // TODO: ユーザーを特定するユーザーネームを受け取る。
-      userName: "dummyUser0001", // ユーザーに確認用、前のページから受け取る
       password: "",
       newPassword: "",
       isShowNewPassword: false,
@@ -327,7 +309,7 @@ input::-moz-placeholder {
     margin: 0 auto;
     padding: 80px 0 0;
 
-    .reset-password_container {
+    .password-register_container {
       use-flex(column, center, center);
       flex: 1;
       margin-top: 35px;
