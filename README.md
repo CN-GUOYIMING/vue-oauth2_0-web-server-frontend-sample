@@ -34,5 +34,5 @@ For a detailed explanation on how things work, check out the [guide](http://vuej
 ## URI
 
 - ./router/index.js を参照してください。
-- `http://localhost:8081/home`: HomePage.vue
-- `http://localhost:8081/resetpassword`: ResetPassword.vue
+- `http://localhost:8081/`: HomePage.vue
+- `http://localhost:8081/passwordregister`: PasswordRegister.vue

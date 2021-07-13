@@ -1,5 +1,5 @@
 <template>
-  <section id="ResetPassword" class="background">
+  <section id="PasswordRegister" class="background">
     <section class="content-container">
       <!-- Header -->
       <header>
@@ -11,6 +11,19 @@
         <!-- Start Sign In Form -->
 
         <h2>パスワードを再設定</h2>
+
+        <!-- エラーが最初に表示するバージョン -->
+        <!-- <p class="error" v-show="errorMessage.newPassword">
+          {{ errorMessage.newPassword }}
+        </p>
+        <p
+          class="error"
+          v-show="errorMessage.newPassword"
+          :style="{ marginTop: '10px' }"
+        >
+          {{ errorMessage.newPasswordConfirm }}
+        </p> -->
+
         <form class="form">
           <section class="inputBox">
             <input
@@ -85,6 +98,22 @@
             {{ errorMessage.newPasswordConfirm }}
           </p>
 
+          <!-- エラーが最後に表示するバージョン -->
+          <!-- <p
+            class="error"
+            v-show="errorMessage.newPassword"
+            :style="{ marginTop: '20px' }"
+          >
+            {{ errorMessage.newPassword }}
+          </p>
+          <p
+            class="error"
+            v-show="errorMessage.newPassword"
+            :style="{ marginTop: '10px' }"
+          >
+            {{ errorMessage.newPasswordConfirm }}
+          </p> -->
+
           <!-- TODO: 利用規約及びプライバシーポリシーへの遷移 -->
           <p class="note">
             <a href="" alt="#">利用規約</a>
@@ -92,9 +121,9 @@
             <a href="" alt="#">プライバシポリシー</a>
           </p>
 
-          <p class="error_whole" v-show="errorMessage.whole">
+          <!-- <p class="error_whole" v-show="errorMessage.whole">
             {{ errorMessage.whole }}
-          </p>
+          </p> -->
 
           <button type="button" @click="sendForm()">
             上記に同意してパスワードを再設定
@@ -117,7 +146,7 @@
 
 <script>
 // Components
-import PasswordInput from "@/components/ResetPassword/PasswordInput";
+import PasswordInput from "@/components/PasswordRegister/PasswordInput";
 
 // Const
 const TEXT_MAX_LENGTH = 16; // 最大入力文字数
@@ -132,7 +161,8 @@ const INPUT_TYPE = {
 const ERROR = {
   WRONG_TEXT_LENGTH: "EX0002: パスワードは 6 ~ 16 桁で入力してください。", // 文字数エラー
   WRONG_TEXT: "EC0003: パスワードは英数字のみで入力してください。", // 記号が存在する
-  PASSWORD_NOT_MATCH: "新パスワードが一致していません。", // 新パスワードが一致しない
+  PASSWORD_NOT_MATCH:
+    "EC0004: 新パスワードの内容と一致することを確認してください。", // 新パスワードが一致しない
   EMPTY_EXIST: "未入力の項目が存在します。", // 未入力項目が存在する
   DEFAULT: "エラーが存在します。" // エラーの存在を提示
 };
@@ -215,22 +245,9 @@ export default {
         errors.newPassword = ERROR.WRONG_TEXT;
       }
 
-      // 新パスワード（確認用）の字数をチェック
-      if (
-        this.newPasswordConfirm.length < TEXT_MIN_LENGTH ||
-        this.newPasswordConfirm.length > TEXT_MAX_LENGTH
-      ) {
-        errors.newPasswordConfirm = ERROR.WRONG_TEXT_LENGTH;
-      }
-
-      // 新パスワード（確認用）の記号をチェック
-      if (!passwordTextRegExp.test(this.newPasswordConfirm)) {
-        errors.newPasswordConfirm = ERROR.WRONG_TEXT;
-      }
-
       // 新パスワードと新パスワード（確認用）が一致するかをチェック
       if (this.newPassword !== this.newPasswordConfirm) {
-        errors.whole = ERROR.PASSWORD_NOT_MATCH;
+        errors.newPasswordConfirm = ERROR.PASSWORD_NOT_MATCH;
       }
 
       // エラーが存在すると戻す値を真に変更
@@ -280,7 +297,7 @@ text-style($color = #000, $size = null, $weight = normal) {
 }
 
 error($size = 12px, $marginTop = null) {
-  text-style(red, $size, bold)
+  text-style(#f76cad, $size, bold)
   margin-top: $marginTop;
   text-align: center;
 }
@@ -440,5 +457,10 @@ input::-moz-placeholder {
       -webkit-transform: scale(0.8);
     }
   }
+}
+
+// 臨時表示用
+.error {
+  error(12px, 10px);
 }
 </style>
