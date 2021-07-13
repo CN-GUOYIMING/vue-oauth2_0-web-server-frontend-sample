@@ -149,7 +149,11 @@ export default {
         // sessionStorage.setItem(KEYS.REFRESH_TOKEN, refreshToken);
 
         // アドレス欄をパラメーター無しの状態に戻す（遷移が発生する）。
-        window.location = DOMAINS.WEB_SERVER;
+        if(!DOMAINS.WEB_SERVER.startsWith('http') && !DOMAINS.WEB_SERVER.startsWith('localhost')){
+          window.location = "https://"+DOMAINS.WEB_SERVER;
+        } else {
+          window.location = DOMAINS.WEB_SERVER;
+        }
       } catch (error) {
         console.log(error);
       }
