@@ -1,5 +1,5 @@
 <!-- 遷移元画面から下記のように：  -->
-<!-- <router-link :to="{ name: 'QrAttendCert', params: { qrcode: 'helloworld' }}">QrcodeGenerator</router-link>  -->
+<!-- this.$router.push({name: 'QrAttendCert', params: {qrcode: qrcode}})  -->
 <template>
   <section id="QrAttendCert">
     <div class="container">
@@ -31,9 +31,12 @@ export default {
   components: {
     VueQrcode
   },
+  props: {
+    qrcode: String
+  },
   data: function() {
     return {
-      targetText: this.$route.params.qrcode,
+      targetText: this.qrcode,
       option: {
         errorCorrectionLevel: "H",
         maskPattern: 0,

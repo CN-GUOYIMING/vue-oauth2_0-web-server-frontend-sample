@@ -19,9 +19,10 @@ export default new Router({
       component: PasswordReset
     },
     {
-      path: "/QrAttendCert/:qrcode",
+      path: "/QrAttendCert",
       name: "QrAttendCert",
-      component: QrAttendCert
+      component: QrAttendCert,
+      props: true
     },
   ]
 });
