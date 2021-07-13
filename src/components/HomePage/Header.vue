@@ -43,7 +43,7 @@
 
 <script>
 // Components
-import NavigationButton from "@/components/NavigationButton";
+import NavigationButton from "@/components/HomePage/NavigationButton";
 
 // Icons
 import home from "@/assets/icon/home.png";

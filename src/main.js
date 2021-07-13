@@ -5,11 +5,6 @@ import App from "./App";
 import router from "./router";
 
 /**
- * url に # が付けられた理由：
- * ソース内に xxx のディレクトリが存在しないので、
- * index.html#/xxx でブラウザを欺く。
- */
-/**
  * Vue インスタンス：
  * - const vm = new Vue({option});
  * - vm: viewModal

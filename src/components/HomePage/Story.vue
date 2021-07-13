@@ -57,8 +57,8 @@
 
 <script>
 // Components
-import PlanItem from "@/components/PlanItem.vue";
-import TableLine from "@/components/TableLine.vue";
+import PlanItem from "@/components/HomePage/PlanItem.vue";
+import TableLine from "@/components/HomePage/TableLine.vue";
 
 export default {
   components: { PlanItem, TableLine },

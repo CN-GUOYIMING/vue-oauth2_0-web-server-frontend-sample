@@ -63,7 +63,7 @@
 
 <script>
 // Components
-import Thesis from "@/components/Thesis.vue";
+import Thesis from "@/components/HomePage/Thesis.vue";
 
 export default {
   components: { Thesis }
