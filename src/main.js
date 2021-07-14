@@ -3,7 +3,9 @@
 import Vue from "vue";
 import App from "./App";
 import router from "./router";
+import './config/Validate'
 
+Vue.config.productionTip = false
 /**
  * Vue インスタンス：
  * - const vm = new Vue({option});
