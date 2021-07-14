@@ -2,6 +2,7 @@ import Vue from "vue";
 import Router from "vue-router";
 import HomePage from "@/page/HomePage";
 import PasswordRegister from "@/page/PasswordRegister";
+import PasswordReset from "@/page/PasswordReset";
 
 Vue.use(Router);
 
@@ -14,9 +15,14 @@ export default new Router({
       component: HomePage
     },
     {
-      path: "/PasswordRegister",
+      path: "/passwordregister",
       name: "PasswordRegister",
       component: PasswordRegister
+    },
+    {
+      path: "/passwordreset",
+      name: "PasswordReset",
+      component: PasswordReset
     }
   ]
 });

@@ -12,18 +12,6 @@
 
         <h2>パスワード登録</h2>
 
-        <!-- エラーが最初に表示するバージョン -->
-        <!-- <p class="error" v-show="errorMessage.newPassword">
-          {{ errorMessage.newPassword }}
-        </p>
-        <p
-          class="error"
-          v-show="errorMessage.newPassword"
-          :style="{ marginTop: '10px' }"
-        >
-          {{ errorMessage.newPasswordConfirm }}
-        </p> -->
-
         <form class="form">
           <section class="inputBox">
             <input
@@ -32,7 +20,7 @@
               v-model="password"
               placeholder="現在のパスワード"
               maxlength="128"
-              @blur="checkIsErrorExist()"
+              autocomplete="off"
             />
           </section>
 
@@ -40,25 +28,7 @@
             {{ errorMessage.password }}
           </p>
 
-          <PasswordInput
-            v-model="newPassword"
-            :placeholder="'新パスワード'"
-            @blur="checkIsErrorExist()"
-          />
-
-          <!-- チェックボックス式 -->
-          <!-- <input
-            class="textBox"
-            :type="newPasswordShowType"
-            v-model="newPassword"
-            placeholder="新パスワード"
-            maxlength="128"
-          />
-
-          <label class="chekbox-container">
-            <input type="checkbox" v-model="isShowNewPassword" />
-            新パスワードを表示する
-          </label> -->
+          <PasswordInput v-model="newPassword" :placeholder="'新パスワード'" />
 
           <p class="error" v-show="errorMessage.newPassword">
             {{ errorMessage.newPassword }}
@@ -69,39 +39,9 @@
             :placeholder="'新パスワード（確認用）'"
           />
 
-          <!-- チェックボックス式 -->
-          <!-- <input
-            class="textBox"
-            :type="newPasswordConfirmShowType"
-            v-model="newPasswordConfirm"
-            placeholder="新パスワード（確認用）"
-            maxlength="128"
-          />
-
-          <label class="chekbox-container">
-            <input type="checkbox" v-model="isShowNewPasswordConfirm" />
-            新パスワード（確認用）を表示する
-          </label> -->
-
           <p class="error" v-show="errorMessage.newPasswordConfirm">
             {{ errorMessage.newPasswordConfirm }}
           </p>
-
-          <!-- エラーが最後に表示するバージョン -->
-          <!-- <p
-            class="error"
-            v-show="errorMessage.newPassword"
-            :style="{ marginTop: '20px' }"
-          >
-            {{ errorMessage.newPassword }}
-          </p>
-          <p
-            class="error"
-            v-show="errorMessage.newPassword"
-            :style="{ marginTop: '10px' }"
-          >
-            {{ errorMessage.newPasswordConfirm }}
-          </p> -->
 
           <!-- NOTE:定義書に存在しない入力共通エラーを表示 -->
           <!-- <p class="error_whole" v-show="errorMessage.whole">
@@ -142,11 +82,10 @@ const INPUT_TYPE = {
 };
 
 const ERROR = {
-  WRONG_TEXT_LENGTH: "EX0002: パスワードは 6 ~ 16 桁で入力してください。", // 文字数エラー
-  WRONG_TEXT: "EC0003: パスワードは英数字のみで入力してください。", // 記号が存在する
-  PASSWORD_NOT_MATCH:
-    "EC0004: 新パスワードの内容と一致することを確認してください。", // 新パスワードが一致しない
-  EMPTY_EXIST: "未入力の項目が存在します。", // 未入力項目が存在する
+  WRONG_TEXT_LENGTH: "パスワードは 6 ~ 16 桁で入力してください。", // 文字数エラー
+  WRONG_TEXT: "パスワードは英数字のみで入力してください。", // 記号が存在する
+  PASSWORD_NOT_MATCH: "新パスワードの内容と一致することを確認してください。", // 新パスワードが一致しない
+  EMPTY_EXIST: "この項目は入力必須です。", // 未入力項目が存在する
   DEFAULT: "エラーが存在します。" // エラーの存在を提示
 };
 
@@ -204,13 +143,7 @@ export default {
       const errors = this.errorMessage;
 
       // 空白が存在するかをチェック
-      Object.keys(this.$data).forEach(key => {
-        if (key.toLowerCase().includes(KEYWORD_FOR_FILTER_VALIDATION_DATA)) {
-          if (this.$data[key] === "") {
-            errors.whole = ERROR.EMPTY_EXIST;
-          }
-        }
-      });
+      this.checkIsEmptyExist(this.$data);
 
       // TODO：現在のパスワードに間違いが無いかをチェック
 
@@ -242,6 +175,16 @@ export default {
       return isErrorExist;
     },
 
+    checkIsEmptyExist(input) {
+      Object.keys(input).forEach(key => {
+        if (key.toLowerCase().includes(KEYWORD_FOR_FILTER_VALIDATION_DATA)) {
+          if (input[key] === "") {
+            return (this.errorMessage[key] = ERROR.EMPTY_EXIST);
+          }
+        }
+      });
+    },
+
     getFinalData() {
       const data = this.$data;
       const newData = {};
@@ -261,8 +204,8 @@ export default {
 };
 </script>
 
-<style lang="stylus">
-@import "~@/assets/stylus/index"
+<style lang="stylus" scoped>
+@import "~@/assets/stylus/index";
 
 /** Mixins */
 use-flex($direction = row, $mainAxis = null, $subAxis = null) {
@@ -281,7 +224,7 @@ text-style($color = #000, $size = null, $weight = normal) {
 error($size = 12px, $marginTop = null) {
   text-style(#f76cad, $size, bold)
   margin-top: $marginTop;
-  text-align: center;
+  text-align: left;
 }
 
 /** Style */
@@ -322,9 +265,10 @@ input::-moz-placeholder {
       }
 
       form {
-        use-flex(column, center, center);
-        // flex-wrap: wrap;
+        use-flex(column, center, flex-start);
+        flex-wrap: wrap;
         margin-top: 25px;
+        width: 260px;
         z-index: 2;
 
         .inputBox {
@@ -370,17 +314,6 @@ input::-moz-placeholder {
 
         .error {
           error(12px, 10px);
-        }
-
-        .note {
-          text-style(#fff, 12px);
-          margin: 40px auto 0 auto;
-          text-align: center;
-          width: 260px;
-
-          a {
-            color: #fff;
-          }
         }
 
         .error_whole {
@@ -439,10 +372,5 @@ input::-moz-placeholder {
       -webkit-transform: scale(0.8);
     }
   }
-}
-
-// 臨時表示用
-.error {
-  error(12px, 10px);
 }
 </style>

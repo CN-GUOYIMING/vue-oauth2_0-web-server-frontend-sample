@@ -3,10 +3,12 @@
     <section class="container">
       <section class="input_container">
         <input
+          class="input_content"
           :type="type"
           :value="value"
           :placeholder="placeholder"
           maxlength="128"
+          autocomplete="off"
           @input="$emit('input', $event.target.value)"
           @focus="setIconBackgroundColor('#fff')"
           @blur="handleInputBoxOnBlur()"
@@ -85,6 +87,15 @@ text-style($color = #000, $size = null, $weight = normal) {
 }
 
 /** Style */
+input::-webkit-input-placeholder {
+  text-style(rgba(255, 255, 255, 0.7), , 300)
+}
+
+input::-moz-placeholder {
+  text-style(rgba(255, 255, 255, 0.7), , 300)
+  opacity: 1;
+}
+
 .container {
   use-flex(, , center);
   height: 50px;
@@ -96,7 +107,7 @@ text-style($color = #000, $size = null, $weight = normal) {
     flex: .85;
     height: 100%;
 
-    input {
+    .input_content {
       use-flex();
       text-style(#fff, 12px, 260);
       background-color: rgba(255, 255, 255, 0.2);
