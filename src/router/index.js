@@ -16,12 +16,12 @@ export default new Router({
       component: HomePage
     },
     {
-      path: "/passwordregister",
+      path: "/PasswordRegister",
       name: "PasswordRegister",
       component: PasswordRegister
     },
     {
-      path: "/passwordreset",
+      path: "/PasswordReset",
       name: "PasswordReset",
       component: PasswordReset
     },

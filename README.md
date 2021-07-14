@@ -26,13 +26,9 @@ For a detailed explanation on how things work, check out the [guide](http://vuej
 
 - `/src/main.js`
 
-## ドメイン
-
-- 認証サーバー（バックエンドのコード）を「<http://localhost:8090>」に変更する必要がある。
-- フロントエンドで認証サーバーのドメイン変更したい場合は`HomePage.vue`の 29 行目を参照してください。
+---
 
 ## URI
 
 - ./router/index.js を参照してください。
 - `http://localhost:8081/`: HomePage.vue
-- `http://localhost:8081/passwordregister`: PasswordRegister.vue
