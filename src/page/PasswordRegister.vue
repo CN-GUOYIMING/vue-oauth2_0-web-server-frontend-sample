@@ -77,16 +77,11 @@ import errorsJSON from "@/assets/errors";
 const TEXT_MAX_LENGTH = 16; // 最大入力文字数
 const TEXT_MIN_LENGTH = 6; // 最小入力文字数
 const KEYWORD_FOR_FILTER_VALIDATION_DATA = "password"; // 確認用のデータをフィルターする為のキーワード
+const DATA_TYPE_STRING = "string";
 
 const INPUT_TYPE = {
   TEXT: "text", // input タグの type 属性を text に
   PASSWORD: "password" // input タグの type 属性を password に
-};
-
-const ERROR = {
-  PASSWORD_NOT_MATCH: "新パスワードの内容と一致することを確認してください。", // 新パスワードが一致しない
-  EMPTY_EXIST: "この項目は入力必須です。", // 未入力項目が存在する
-  DEFAULT: "エラーが存在します。" // エラーの存在を提示
 };
 
 const errorsList = {
@@ -133,9 +128,7 @@ export default {
       Object.keys(errors).forEach(key => (errors[key] = ""));
 
       // エラーチェック
-      if (this.checkIsErrorExist()) {
-        console.log(ERROR.DEFAULT);
-      } else {
+      if (!this.checkIsErrorExist()) {
         const dataForSend = this.getFinalData();
 
         // TODO: API に dataForSend を送る。
@@ -145,65 +138,82 @@ export default {
 
     checkIsErrorExist() {
       let isErrorExist = false;
-      const passwordTextRegExp = /^[a-zA-Z0-9]+$/;
-      const errors = this.errorMessage;
-
-      // 空白が存在するかをチェック
-      this.checkEmpty(this.$data);
-
-      // TODO：現在のパスワードに間違いが無いかをチェック
-
-      // 新パスワードの字数をチェック
-      this.checkPasswordLength(this.newPassword);
-      // if (
-      //   this.newPassword.length < TEXT_MIN_LENGTH ||
-      //   this.newPassword.length > TEXT_MAX_LENGTH
-      // ) {
-      //   errors.newPassword = errorsList.wronTextLength;
-      // }
-
-      // 新パスワードの記号をチェック
-      if (!passwordTextRegExp.test(this.newPassword)) {
-        errors.newPassword = errorsList.wronText;
-      }
-
-      // 新パスワードと新パスワード（確認用）が一致するかをチェック
-      if (this.newPassword !== this.newPasswordConfirm) {
-        errors.newPasswordConfirm = ERROR.PASSWORD_NOT_MATCH;
-      }
+      this.setErrors();
 
       // エラーが存在すると戻す値を真に変更
+      const errors = this.errorMessage;
+
       Object.keys(errors).forEach(key => {
         if (errors[key] !== "") {
-          isErrorExist = true;
+          return (isErrorExist = true);
         }
       });
 
       return isErrorExist;
     },
 
-    checkEmpty(input) {
-      Object.keys(input).forEach(key => {
-        if (key.toLowerCase().includes(KEYWORD_FOR_FILTER_VALIDATION_DATA)) {
-          if (input[key] === "") {
-            return (this.errorMessage[key] = ERROR.EMPTY_EXIST);
-          }
+    setErrors() {
+      // TODO：現在のパスワードに間違いが無いかをチェック
+
+      // 新パスワードの記号をチェック
+      this.checkPasswordTextType(this.newPassword);
+      // 新パスワードの字数をチェック
+      this.checkPasswordLength(this.newPassword);
+      // 新パスワードと新パスワード（確認用）が一致するかをチェック
+      this.checkPasswordConfirm();
+    },
+
+    checkPasswordTextType(password) {
+      const passwordTextRegExp = /^[a-zA-Z0-9]+$/;
+
+      if (passwordTextRegExp.test(password)) return;
+
+      const data = this.$data;
+
+      Object.keys(data).forEach(key => {
+        if (data[key] === "") {
+          return (this.errorMessage[key] = "この項目は入力必須です。");
+        }
+
+        if (data[key] === password) {
+          this.errorMessage[key] = errorsList.wronText
+            .replace("{0}", "パスワード")
+            .replace("{1}", "英数字のみ");
+
+          return this.errorMessage[key];
         }
       });
     },
 
     checkPasswordLength(password) {
-      if (
-        password.length < TEXT_MIN_LENGTH ||
-        password.length > TEXT_MAX_LENGTH
-      ) {
-        const data = this.$data;
+      const passwordIsInRange =
+        TEXT_MIN_LENGTH <= password.length &&
+        password.length <= TEXT_MAX_LENGTH;
 
-        Object.keys(data).forEach(key => {
-          if (data[key] === password) {
-            return (this.errorMessage[key] = errorsList.wronTextLength);
-          }
-        });
+      if (passwordIsInRange) return;
+
+      const data = this.$data;
+
+      Object.keys(data).forEach(key => {
+        if (data[key] === "") {
+          return (this.errorMessage[key] = "この項目は入力必須です。");
+        }
+
+        if (data[key] === password) {
+          this.errorMessage[key] = errorsList.wronTextLength
+            .replace("{0}", "パスワード")
+            .replace("{1}", " 6 ~ 16 ");
+
+          return this.errorMessage[key];
+        }
+      });
+    },
+
+    checkPasswordConfirm() {
+      if (this.newPassword !== this.newPasswordConfirm) {
+        this.errorMessage.newPasswordConfirm = errorsList.passwordNotMatch;
+
+        return this.errorMessage.newPasswordConfirm;
       }
     },
 
@@ -217,7 +227,9 @@ export default {
 
       // 前後の空白を削除
       Object.keys(newData).forEach(key => {
-        newData[key] = newData[key].trim();
+        if (typeof newData[key] === DATA_TYPE_STRING) {
+          return (newData[key] = newData[key].trim());
+        }
       });
 
       return newData;
