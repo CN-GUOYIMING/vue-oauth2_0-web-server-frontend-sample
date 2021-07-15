@@ -70,6 +70,8 @@
 <script>
 // Components
 import PasswordInput from "@/components/PasswordRegister/PasswordInput";
+// エラー定義書
+import errorsJSON from "@/assets/errors";
 
 // Const
 const TEXT_MAX_LENGTH = 16; // 最大入力文字数
@@ -82,11 +84,15 @@ const INPUT_TYPE = {
 };
 
 const ERROR = {
-  WRONG_TEXT_LENGTH: "パスワードは 6 ~ 16 桁で入力してください。", // 文字数エラー
-  WRONG_TEXT: "パスワードは英数字のみで入力してください。", // 記号が存在する
   PASSWORD_NOT_MATCH: "新パスワードの内容と一致することを確認してください。", // 新パスワードが一致しない
   EMPTY_EXIST: "この項目は入力必須です。", // 未入力項目が存在する
   DEFAULT: "エラーが存在します。" // エラーの存在を提示
+};
+
+const errorsList = {
+  wronTextLength: errorsJSON.EC0002,
+  wronText: errorsJSON.EC0003,
+  passwordNotMatch: errorsJSON.EC0004
 };
 
 export default {
@@ -143,21 +149,22 @@ export default {
       const errors = this.errorMessage;
 
       // 空白が存在するかをチェック
-      this.checkIsEmptyExist(this.$data);
+      this.checkEmpty(this.$data);
 
       // TODO：現在のパスワードに間違いが無いかをチェック
 
       // 新パスワードの字数をチェック
-      if (
-        this.newPassword.length < TEXT_MIN_LENGTH ||
-        this.newPassword.length > TEXT_MAX_LENGTH
-      ) {
-        errors.newPassword = ERROR.WRONG_TEXT_LENGTH;
-      }
+      this.checkPasswordLength(this.newPassword);
+      // if (
+      //   this.newPassword.length < TEXT_MIN_LENGTH ||
+      //   this.newPassword.length > TEXT_MAX_LENGTH
+      // ) {
+      //   errors.newPassword = errorsList.wronTextLength;
+      // }
 
       // 新パスワードの記号をチェック
       if (!passwordTextRegExp.test(this.newPassword)) {
-        errors.newPassword = ERROR.WRONG_TEXT;
+        errors.newPassword = errorsList.wronText;
       }
 
       // 新パスワードと新パスワード（確認用）が一致するかをチェック
@@ -175,7 +182,7 @@ export default {
       return isErrorExist;
     },
 
-    checkIsEmptyExist(input) {
+    checkEmpty(input) {
       Object.keys(input).forEach(key => {
         if (key.toLowerCase().includes(KEYWORD_FOR_FILTER_VALIDATION_DATA)) {
           if (input[key] === "") {
@@ -183,6 +190,21 @@ export default {
           }
         }
       });
+    },
+
+    checkPasswordLength(password) {
+      if (
+        password.length < TEXT_MIN_LENGTH ||
+        password.length > TEXT_MAX_LENGTH
+      ) {
+        const data = this.$data;
+
+        Object.keys(data).forEach(key => {
+          if (data[key] === password) {
+            return (this.errorMessage[key] = errorsList.wronTextLength);
+          }
+        });
+      }
     },
 
     getFinalData() {
